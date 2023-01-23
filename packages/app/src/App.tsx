@@ -33,9 +33,30 @@ import { AppRouter, FlatRoutes } from '@backstage/core-app-api';
 import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
+import { CssBaseline, ThemeProvider } from '@material-ui/core';
+import LightIcon from '@material-ui/icons/WbSunny'
+import DarkModeIcon from '@material-ui/icons/Brightness2'
+import { customLightTheme, customDarkTheme } from './theme';
+import { githubAuthApiRef } from '@backstage/core-plugin-api';
+import { SignInPage } from '@backstage/core-components';
+import { OcmPage } from '@janus-idp/backstage-plugin-ocm'
 
 const app = createApp({
   apis,
+  components: {
+    SignInPage: props => (
+      <SignInPage
+        {...props}
+        auto
+        provider={{
+          id: 'github-auth-provider',
+          title: 'GitHub',
+          message: 'Sign in using GitHub',
+          apiRef: githubAuthApiRef,
+        }}
+      />
+    ),
+  },
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
       createComponent: scaffolderPlugin.routes.root,
@@ -51,6 +72,28 @@ const app = createApp({
       catalogIndex: catalogPlugin.routes.catalogIndex,
     });
   },
+  themes: [{
+    id: 'my-theme',
+    title: 'Light',
+    variant: 'light',
+    icon: <LightIcon />,
+    Provider: ({ children }) => (
+      <ThemeProvider theme={customLightTheme}>
+        <CssBaseline>{children}</CssBaseline>
+      </ThemeProvider>
+    )},
+    {
+      id: 'my-dark-theme',
+      title: 'Dark',
+      variant: 'dark',
+      icon: <DarkModeIcon />,
+      Provider: ({ children }) => (
+        <ThemeProvider theme={customDarkTheme}>
+          <CssBaseline>{children}</CssBaseline>
+        </ThemeProvider>
+      )
+    }
+  ]
 });
 
 const routes = (
@@ -91,6 +134,7 @@ const routes = (
     </Route>
     <Route path="/settings" element={<UserSettingsPage />} />
     <Route path="/catalog-graph" element={<CatalogGraphPage />} />
+    <Route path="/ocm" element={<OcmPage />} />
   </FlatRoutes>
 );
 

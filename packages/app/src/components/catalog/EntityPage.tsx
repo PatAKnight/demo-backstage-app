@@ -55,6 +55,9 @@ import {
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
+import { GithubIssuesPage } from '@backstage/plugin-github-issues';
+import { EntityKubernetesContent } from '@backstage/plugin-kubernetes'
+import { ClusterContextProvider, ClusterStatusCard } from '@janus-idp/backstage-plugin-ocm';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -162,6 +165,14 @@ const serviceEntityPage = (
       </Grid>
     </EntityLayout.Route>
 
+    <EntityLayout.Route path="/github-issues" title="GitHub Issues">
+      <GithubIssuesPage />
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/kubernetes" title="Kubernetes">
+      <EntityKubernetesContent refreshIntervalMs={30000} />
+    </EntityLayout.Route>
+
     <EntityLayout.Route path="/docs" title="Docs">
       {techdocsContent}
     </EntityLayout.Route>
@@ -187,6 +198,14 @@ const websiteEntityPage = (
           <EntityDependsOnResourcesCard variant="gridItem" />
         </Grid>
       </Grid>
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/github-issues" title="GitHub Issues">
+      <GithubIssuesPage />
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/kubernetes" title="Kubernetes">
+      <EntityKubernetesContent refreshIntervalMs={30000} />
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/docs" title="Docs">
@@ -295,6 +314,11 @@ const groupPage = (
         </Grid>
       </Grid>
     </EntityLayout.Route>
+
+    <EntityLayout.Route path="github-issues" title="GitHub Issues">
+      <GithubIssuesPage />
+    </EntityLayout.Route>
+
   </EntityLayout>
 );
 
@@ -364,6 +388,16 @@ const domainPage = (
   </EntityLayout>
 );
 
+const resourcePage = (
+  <EntityLayout>
+    <EntitySwitch.Case if={e => e?.spec?.type === "kubernetes-cluster"}>
+      <ClusterContextProvider>
+        <ClusterStatusCard />
+      </ClusterContextProvider>
+    </EntitySwitch.Case>
+  </EntityLayout>
+);
+
 export const entityPage = (
   <EntitySwitch>
     <EntitySwitch.Case if={isKind('component')} children={componentPage} />
@@ -372,6 +406,7 @@ export const entityPage = (
     <EntitySwitch.Case if={isKind('user')} children={userPage} />
     <EntitySwitch.Case if={isKind('system')} children={systemPage} />
     <EntitySwitch.Case if={isKind('domain')} children={domainPage} />
+    <EntitySwitch.Case if={isKind('resource')} children={resourcePage} />
 
     <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
   </EntitySwitch>
